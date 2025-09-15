@@ -1,0 +1,11 @@
+{
+  "info": {
+    "name": "truss",
+    "version": "0.1.0",
+    "description": "High-performance 3GPP 5G User Plane Function (UPF) and programmable packet routing fabric in Pony",
+    "homepage": "https://github.com/aneesh495/truss",
+    "license": "Apache-2.0"
+  },
+  "packages": [],
+  "deps": []
+}
