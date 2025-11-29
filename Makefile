@@ -4,7 +4,7 @@ CC ?= clang
 CFLAGS ?= -O3 -Wall -Wextra -pedantic -fPIC -std=c11
 AR ?= ar
 PONYC ?= ponyc
-PONYC_FLAGS ?= --pic -p build
+PONYC_FLAGS ?= --pic -p build -Dopenssl_3.0.x
 
 SRC_DIR := src
 BUILD_DIR := build
