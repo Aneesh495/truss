@@ -11,7 +11,7 @@ class RoutingTrie
   """
   var _trie: Pointer[None]
 
-  new create() =>
+  new iso create() =>
     _trie = @lpm_trie_create()
 
   fun ref insert(prefix: Ipv4Address, mask_len: U8, nexthop_id: U16): Bool =>

@@ -51,21 +51,13 @@ void lpm_trie_destroy(lpm_trie_t *trie) {
     free(trie);
 }
 
-/* Convert big-endian IPv4 to host byte order for bit shifts */
-static inline uint32_t to_host_u32(uint32_t val_be) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    return __builtin_bswap32(val_be);
-#else
-    return val_be;
-#endif
-}
-
 bool lpm_trie_insert(lpm_trie_t *trie, uint32_t ip_be, uint8_t prefix_len, uint16_t nexthop_id) {
     if (!trie || prefix_len > 32 || nexthop_id == LPM_INVALID_NEXTHOP) {
         return false;
     }
 
-    uint32_t ip_h = to_host_u32(ip_be);
+    /* IPv4 integer is already structured with MSB = high octet */
+    uint32_t ip_h = ip_be;
 
     if (prefix_len <= 24) {
         /* Route fits in tbl24 */
@@ -75,9 +67,9 @@ bool lpm_trie_insert(lpm_trie_t *trie, uint32_t ip_be, uint8_t prefix_len, uint1
         for (uint32_t i = 0; i < count; i++) {
             uint32_t idx = base_idx + i;
             if (idx < LPM_TBL24_SIZE) {
-                /* If existing entry is a tbl8 pointer, we also propagate to tbl8 */
+                /* If existing entry is a tbl8 pointer, propagate covering route to tbl8 slots */
                 uint16_t current = trie->tbl24[idx];
-                if ((current & LPM_FLAG_TBL8) != 0) {
+                if (current != LPM_INVALID_NEXTHOP && (current & LPM_FLAG_TBL8) != 0) {
                     uint32_t group_idx = (current & ~LPM_FLAG_TBL8);
                     uint16_t *group = &trie->tbl8[group_idx * LPM_TBL8_GROUP_SIZE];
                     for (uint32_t k = 0; k < LPM_TBL8_GROUP_SIZE; k++) {
@@ -97,7 +89,7 @@ bool lpm_trie_insert(lpm_trie_t *trie, uint32_t ip_be, uint8_t prefix_len, uint1
         uint16_t current = trie->tbl24[tbl24_idx];
         uint32_t group_idx = 0;
 
-        if ((current & LPM_FLAG_TBL8) == 0) {
+        if (current == LPM_INVALID_NEXTHOP || (current & LPM_FLAG_TBL8) == 0) {
             /* Allocate new tbl8 group */
             if (trie->tbl8_groups_used >= trie->max_tbl8_groups) {
                 /* Exceeded max tbl8 capacity */
@@ -138,9 +130,13 @@ uint16_t lpm_trie_lookup(const lpm_trie_t *trie, uint32_t ip_be) {
         return LPM_INVALID_NEXTHOP;
     }
 
-    uint32_t ip_h = to_host_u32(ip_be);
+    uint32_t ip_h = ip_be;
     uint32_t tbl24_idx = (ip_h >> 8) & 0x00FFFFFF;
     uint16_t val = trie->tbl24[tbl24_idx];
+
+    if (val == LPM_INVALID_NEXTHOP) {
+        return LPM_INVALID_NEXTHOP;
+    }
 
     if ((val & LPM_FLAG_TBL8) == 0) {
         return val;
