@@ -13,11 +13,11 @@ class TokenBucket
   let _burst: U64
   var _last_refill_ns: U64
 
-  new create(rate_bytes_per_sec: U64, burst_bytes: U64) =>
+  new create(rate_bytes_per_sec: U64, burst_bytes: U64, start_time_ns: U64 = 0) =>
     _rate = rate_bytes_per_sec
     _burst = burst_bytes
     _tokens = burst_bytes
-    _last_refill_ns = MonotonicClock.nanos()
+    _last_refill_ns = if start_time_ns == 0 then MonotonicClock.nanos() else start_time_ns end
 
   fun ref refill(now_ns: U64) =>
     if now_ns > _last_refill_ns then
@@ -27,6 +27,9 @@ class TokenBucket
         _tokens = (_tokens + tokens_to_add).min(_burst)
         _last_refill_ns = now_ns
       end
+    elseif _last_refill_ns > now_ns then
+      /* Handle clock reset / synthetic time base */
+      _last_refill_ns = now_ns
     end
 
   fun ref try_consume(requested_bytes: U64, now_ns: U64 = 0): Bool =>
