@@ -41,7 +41,14 @@ $(BIN_DIR)/test_suite: c_fastpath $(wildcard $(SRC_DIR)/test_suite/*.pony) $(wil
 test: $(BIN_DIR)/test_suite
 	./$(BIN_DIR)/test_suite
 
-bench: c_fastpath
+$(BIN_DIR)/c_fastpath_bench: c_fastpath benchmarks/c_fastpath_bench.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -I$(SRC_DIR)/c_fastpath benchmarks/c_fastpath_bench.c $(FASTPATH_LIB) -o $@
+
+bench-c: $(BIN_DIR)/c_fastpath_bench
+	./$(BIN_DIR)/c_fastpath_bench
+
+bench: c_fastpath bench-c
 	python3 benchmarks/bench_runner.py
 
 clean:
