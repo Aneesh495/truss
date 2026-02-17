@@ -1,0 +1,42 @@
+name: Truss CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build & Test Suite
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Toolchain Dependencies
+        run: |
+          brew update
+          brew install ponyc corral openssl@3
+
+      - name: Compile Fastpath & Binaries
+        run: |
+          make all
+
+      - name: Execute Native C Micro-Benchmarks
+        run: |
+          make bench-c
+
+      - name: Execute Full Pony Unit Test Suite
+        run: |
+          make test
+
+      - name: Verify CLI Tools Help Outputs
+        run: |
+          ./tools/trussctl --help
+          ./tools/smf_simulator.py --help
+          ./tools/ran_traffic_gen.py --help
+          ./tools/packet_inspector.py --help
+          ./tools/synthetic_workload.py --help
+          ./tools/conformance_suite.py --help
