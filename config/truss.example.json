@@ -1,0 +1,42 @@
+{
+  "node_id": "10.0.0.1",
+  "node_name": "truss-upf-primary",
+  "pfcp": {
+    "bind_address": "0.0.0.0",
+    "port": 8805,
+    "heartbeat_interval_sec": 10,
+    "max_retransmissions": 3,
+    "transaction_cache_capacity": 1024
+  },
+  "gtpu": {
+    "bind_address": "0.0.0.0",
+    "port": 2152,
+    "socket_buffer_bytes": 4194304,
+    "mtu": 1500,
+    "enable_qfi_parsing": true
+  },
+  "core_network": {
+    "interface_ip": "10.100.0.1",
+    "default_gateway": "10.100.0.254",
+    "dns_servers": [
+      "8.8.8.8",
+      "1.1.1.1"
+    ]
+  },
+  "admin": {
+    "bind_address": "127.0.0.1",
+    "port": 8080,
+    "enable_metrics": true,
+    "enable_health_check": true
+  },
+  "qos": {
+    "default_cir_bps": 10000000,
+    "default_cbs_bytes": 10000,
+    "default_pir_bps": 50000000,
+    "default_pbs_bytes": 25000
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "text"
+  }
+}

@@ -1,0 +1,31 @@
+[Unit]
+Description=Truss 5G User Plane Function (UPF) Daemon
+Documentation=https://github.com/Aneesh495/truss
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=truss
+Group=truss
+WorkingDirectory=/var/lib/truss
+ExecStart=/usr/local/bin/truss --config /etc/truss/truss.json
+Restart=always
+RestartSec=3s
+LimitNOFILE=1048576
+LimitMEMLOCK=infinity
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=99
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=truss-upf
+
+# Security Hardening
+ProtectSystem=strict
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
